@@ -278,22 +278,7 @@ async def main():
         await bot.reply_to(message, "Please provide the article number related to the bug.")
 
     # Handle text messages for various states
-    @bot.message_handler(func=lambda message: True)
-    async def handle_text(message: Message):
-        user_id = message.from_user.id
-        state = user_state.get(user_id)
-        logging.info(f"Handling text message from user: {user_id}, state: {state}")
-
-        if state == 'waiting_for_article_number':
-            bug_reports[user_id]['article_number'] = message.text
-            user_state[user_id] = 'collecting_bug_details'
-            await bot.reply_to(message, "Please describe the bug and/or upload any relevant media. When you're done, send /submit_bug to submit the report.")
-        elif state == 'collecting_bug_details':
-            bug_reports[user_id]['description'] += message.text + '\n'
-            await bot.reply_to(message, "Description added. You can add more details or media, or send /submit_bug to submit the report.")
-        else:
-            await bot.reply_to(message, "Please start by using the /bug_report command.")
-
+    
     # Handle photo uploads
     @bot.message_handler(content_types=["photo"])
     async def handle_photo(message: Message):
