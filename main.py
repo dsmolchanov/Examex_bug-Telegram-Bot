@@ -126,8 +126,11 @@ async def main():
     parser.add_argument("supabase_url", help="Supabase URL")
     parser.add_argument("supabase_api_key", help="Supabase API key")
     options = parser.parse_args()
-    print("Arg parse done.")
-    logging.info("Arguments parsed successfully.")
+    logging.info("Arguments parsed: %s, %s, %s", options.tg_token, options.supabase_url, options.supabase_api_key)
+
+    # Initialize Supabase client
+    supabase: Client = create_client(options.supabase_url, options.supabase_api_key)
+    logging.info("Supabase client initialized.")
 
     # Initialize the bot
     bot = AsyncTeleBot(options.tg_token)
@@ -139,8 +142,8 @@ async def main():
             telebot.types.BotCommand("submit_bug", "Submit the bug report")
         ],
     )
-    print("Bot init done.")
-    logging.info("Bot initialized successfully with commands.")
+    logging.info("Bot initialized with commands.")
+
 
     # Command to start bug reporting
     @bot.message_handler(commands=["bug_report"])

@@ -33,7 +33,7 @@ docker build -t gemini_tg_bot .
 ```
 6. run
 ```
-docker run -d --restart=always -e TELEGRAM_BOT_API_KEY={Telegram Bot API} -e GEMINI_API_KEYS={Gemini API Key} gemini_tg_bot
+docker run -d --restart=always -e =TELEGRAM_BOT_API_KEY{Telegram Bot API} -e GEMINI_API_KEYS={Gemini API Key} gemini_tg_bot
 ```
 
 ## (3)Deploy on Railway
