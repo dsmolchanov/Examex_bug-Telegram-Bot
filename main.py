@@ -90,7 +90,7 @@ def escape(text, flag=0):
     text = re.sub(r"\!?\[(.*?)\]\((.*?)\)", "@@@\\1@@@^^^\\2^^^", text)
     text = re.sub(r"\[", "\[", text)
     text = re.sub(r"\]", "\]", text)
-    text = re.sub(r"\(", "\(" text)
+    text = re.sub(r"\(", "\(", text)
     text = re.sub(r"\)", "\)", text)
     text = re.sub(r"\@\-\>\@", "\[", text)
     text = re.sub(r"\@\<\-\@", "\]", text)
@@ -393,7 +393,7 @@ async def main():
             default_model_dict[str(message.from_user.id)] = True
             await bot.reply_to(message, "Now you are using gemini-1.5-flash")
 
-    @bot.message_handler(func=lambda message: message.chat.type == "private", content_types=['text'])
+    @bot.message_handler(func=lambda message: message.chat.type == "private" and not message.text.startswith(("/", ".")), content_types=['text'])
     async def gemini_private_handler(message: Message):
         m = message.text.strip()
         if str(message.from_user.id) not in default_model_dict:
