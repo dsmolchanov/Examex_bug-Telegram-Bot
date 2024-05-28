@@ -4,9 +4,14 @@ import asyncio
 import google.generativeai as genai
 import re
 import requests
+from datetime import datetime
 from telebot import types
 from telebot.async_telebot import AsyncTeleBot
 from telebot.types import Message
+
+# Initialize logger
+import logging
+logging.basicConfig(level=logging.INFO)
 
 gemini_player_dict = {}
 gemini_pro_player_dict = {}
@@ -212,6 +217,7 @@ bug_reports = {}
 
 # Function to register a tester
 def register_tester(user_id, telegram_id, supabase_url, supabase_api_key):
+    logging.info(f"Registering tester: {user_id} with Telegram ID: {telegram_id}")
     response = requests.post(f'{supabase_url}/rest/v1/bug_testers', json={
         'user_id': user_id,
         'telegram_id': telegram_id,
@@ -231,6 +237,7 @@ async def main():
     parser.add_argument("supabase_api_key", help="Supabase API key")
     options = parser.parse_args()
     print("Arg parse done.")
+    logging.info("Arguments parsed successfully.")
 
     # Initialize the bot
     bot = AsyncTeleBot(options.tg_token)
@@ -247,10 +254,12 @@ async def main():
         ],
     )
     print("Bot init done.")
+    logging.info("Bot initialized successfully with commands.")
 
     # Command to start bug reporting
     @bot.message_handler(commands=["bug_report"])
     async def bug_report_handler(message: Message):
+        logging.info(f"Handling /bug_report command from user: {message.from_user.id}")
         user_id = message.from_user.id
         telegram_id = message.from_user.username if message.from_user.username else str(message.from_user.id)
 
@@ -273,6 +282,7 @@ async def main():
     async def handle_text(message: Message):
         user_id = message.from_user.id
         state = user_state.get(user_id)
+        logging.info(f"Handling text message from user: {user_id}, state: {state}")
 
         if state == 'waiting_for_article_number':
             bug_reports[user_id]['article_number'] = message.text
@@ -289,6 +299,7 @@ async def main():
     async def handle_photo(message: Message):
         user_id = message.from_user.id
         state = user_state.get(user_id)
+        logging.info(f"Handling photo upload from user: {user_id}, state: {state}")
 
         if state == 'collecting_bug_details':
             file_info = await bot.get_file(message.photo[-1].file_id)
@@ -303,6 +314,7 @@ async def main():
     async def handle_video(message: Message):
         user_id = message.from_user.id
         state = user_state.get(user_id)
+        logging.info(f"Handling video upload from user: {user_id}, state: {state}")
 
         if state == 'collecting_bug_details':
             file_info = await bot.get_file(message.video.file_id)
@@ -315,6 +327,7 @@ async def main():
     # Command to submit the bug report
     @bot.message_handler(commands=["submit_bug"])
     async def submit_bug_handler(message: Message):
+        logging.info(f"Handling /submit_bug command from user: {message.from_user.id}")
         user_id = message.from_user.id
         report = bug_reports.get(user_id)
         if not report:
@@ -338,10 +351,12 @@ async def main():
 
         if response.status_code == 201:
             await bot.reply_to(message, "Bug report submitted successfully!")
+            logging.info(f"Bug report submitted successfully by user: {user_id}")
             del user_state[user_id]
             del bug_reports[user_id]
         else:
             await bot.reply_to(message, "Failed to submit bug report. Please try again.")
+            logging.error(f"Failed to submit bug report for user: {user_id}, response: {response.text}")
 
     # Init commands
     @bot.message_handler(commands=["start"])
@@ -453,6 +468,7 @@ async def main():
                 await bot.edit_message_text(error_info, chat_id=sent_message.chat.id, message_id=sent_message.message_id)
 
     print("Starting Gemini_Telegram_Bot.")
+    logging.info("Starting Gemini_Telegram_Bot.")
     await bot.polling(none_stop=True)
 
 if __name__ == '__main__':
